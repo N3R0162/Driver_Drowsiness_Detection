@@ -8,6 +8,37 @@ import random
 import time
 from scipy.integrate import simps
 from tqdm import tqdm
+logger = logging.getLogger(__name__)
+from twilio.base.exceptions import TwilioRestException
+from twilio.rest import Client
+import streamlit as st
+
+def buddha_blessing():
+    print("""
+                        _oo0oo_
+                       o8888888o  
+                       88" . "88
+                       (| -_- |)
+                       0\  =  /0
+                     ___/`---'\___
+                   .' \\|     |//  '.
+                  / \\|||  :  |||// \\
+                 / _||||| -:- |||||- \\
+                |   | \\\  -  /// |   |
+                | \_|  ''\---/''  |_/ |
+                \ .-\\__  '-'  ___/-. /
+              ___'. .'  /--.--\  `. .'___
+           .""   '<`.___\_<|>_/___.' >'  "".
+          | | :  `- \`.;`\ _ /`;.`/ - ` : | |
+          \\  \\ `_. \_ __\ /__ _/   .-` /  /
+      =====`-.____`.___ \_____/___.-`___.-'=====
+                        `=---='
+
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+             Phật phù hộ, không bao giờ BUG
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    """)
+    return None
 
 def get_label(data_name, label_file, task_type=None):
     label_path = os.path.join('data', data_name, label_file)
@@ -199,6 +230,8 @@ def forward_pip(net, inputs, preprocess, input_size, net_stride, num_nb):
 
     return tmp_x, tmp_y, tmp_nb_x, tmp_nb_y, outputs_cls, max_cls
 
+
+
 def compute_nme(lms_pred, lms_gt, norm):
     lms_pred = lms_pred.reshape((-1, 2))
     lms_gt = lms_gt.reshape((-1, 2))
@@ -212,3 +245,49 @@ def compute_fr_and_auc(nmes, thres=0.01, step=0.0001):
     fr = 1.0 - ys[-1]
     auc = simps(ys, x=xs) / thres
     return fr, auc
+
+
+def calculate_aspect_ratio(lms_pred):
+    point_0 = np.array([lms_pred[0], lms_pred[1]])
+    point_1 = np.array([lms_pred[2], lms_pred[3]])
+    point_2 = np.array([lms_pred[4], lms_pred[5]])
+    point_3 = np.array([lms_pred[6], lms_pred[7]])
+    point_4 = np.array([lms_pred[8], lms_pred[9]])
+    point_5 = np.array([lms_pred[10], lms_pred[11]])
+    point_6 = np.array([lms_pred[12], lms_pred[13]])
+    point_7 = np.array([lms_pred[14], lms_pred[15]])
+    point_8 = np.array([lms_pred[16], lms_pred[17]])
+    point_9 = np.array([lms_pred[18], lms_pred[19]])
+    point_10 = np.array([lms_pred[20], lms_pred[21]])
+    point_11 = np.array([lms_pred[22], lms_pred[23]])
+    point_12 = np.array([lms_pred[24], lms_pred[25]])
+    point_13 = np.array([lms_pred[26], lms_pred[27]])
+    point_14 = np.array([lms_pred[28], lms_pred[29]])
+    point_15 = np.array([lms_pred[30], lms_pred[31]])
+
+
+    left_height_1 = np.linalg.norm(point_1 - point_7)
+    left_height_2 = np.linalg.norm(point_2 - point_6)
+    left_height_3 = np.linalg.norm(point_3 - point_5)
+    left_width = np.linalg.norm(point_0 - point_4)
+    left_eye_aspect_ratio = (left_height_1 + left_height_2 + left_height_3) / (3 * left_width)
+
+    right_height_1 = np.linalg.norm(point_9 - point_15)
+    right_height_2 = np.linalg.norm(point_10 - point_14)    
+    right_height_3 = np.linalg.norm(point_11 - point_13)
+    right_width = np.linalg.norm(point_8 - point_12)
+    right_eye_aspect_ratio = (right_height_1 + right_height_2 + right_height_3) / (3 * right_width)
+
+    average_aspect_ratio = (left_eye_aspect_ratio + right_eye_aspect_ratio) / 2
+    return average_aspect_ratio, left_eye_aspect_ratio, right_eye_aspect_ratio
+
+
+def style_table(df):
+    # Apply CSS styling to the DataFrame
+    styled_df = df.style.set_table_styles([
+        dict(selector="th", props=[("font-size", "14px"), ("text-align", "center"), ("background-color", "#3498db"), ("color", "white"), ("border", "1px solid #dddddd")]),
+        dict(selector="td", props=[("font-size", "14px"), ("text-align", "center"), ("border", "1px solid #dddddd")]),
+        dict(selector=".row-hover:hover", props=[("background-color", "#f2f2f2")]),
+        dict(selector=".blank_row", props=[("display", "none")])  # Hide blank rows
+    ])
+    return styled_df
